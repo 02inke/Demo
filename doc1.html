@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .bo{
+            width: 600px;
+            height: 100px;
+            margin: 0 auto;
+            justify-items: center;
+        }
+        .header{
+            width: 100px;
+            margin: auto;
+        }
+        div{
+            display: flex;
+        }
+        .container{
+            width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        canvas{
+            background-color: rgb(218, 194, 158);
+            /* margin: 0 auto; */
+            /* padding: 0; */
+        }
+        .box{
+            width: 600px;
+            margin: auto;
+            display: flex;
+        }
+        #btn{
+            width: 50%;
+            height: 50px;
+            border: 1px solid;
+        }
+        .al{
+            width: 200px;
+            height: 150px;
+            background-color: white;
+            position: absolute;
+            top: 125px;
+            left: 200px;
+            justify-items: center;
+            z-index: -1;
+        }
+        .at{
+            margin: auto;
+            display: flex;
+            position: relative;
+        }
+        #bt{
+            width: 50px;
+            height: 20px;
+            background-color: rgb(133, 133, 231);
+            right: 10px;
+            bottom: 10px;
+            position: absolute;
+            border: 0;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="bo">
+        <div class="header">贪吃蛇大作战</div>
+    </div>
+    <div class="container">
+        <canvas id="myCan" width="600" height="400" style="border: 2px solid rgb(95, 82, 82);"></canvas>
+        <div class="al" id="star">
+            <div class="at">游戏结束!</div>
+            <input type="button" id="bt" value="确定" onclick="hide()">
+        </div>
+    </div>
+    <div class="box">
+        <input type="button" id="btn" value="开始" onclick="run()">
+    <input type="button" id="btn" value="暂停/继续" onclick="stop()">
+    </div>
+    
+    <script>
+        var ctn = document.getElementById("myCan");
+        var c = ctn.getContext("2d");
+        var snake = [];
+        var count_snake = 5;
+        var foodx = Math.floor(Math.random()*30)*20;
+        var foody = Math.floor(Math.random()*20)*20;
+        var lo;
+        var th;
+        var temp = 1;
+        function start(){
+            count_snake = 5;
+            snake = [];
+            for(let j=0;j<count_snake;j++){
+            snake[j] = {x:80+j*20,y:80};
+            }
+            lo = 3;
+            food();
+            draw();
+        }
+        start();
+        function draw(){
+            c.clearRect(0,0,600,400);
+            for(let i=20;i<400;i+=20){
+                c.moveTo(0,i);
+                c.lineTo(600,i);
+                c.strokeStyle="black";
+                c.stroke();
+            }
+            for(let i=20;i<600;i+=20){
+                c.moveTo(i,0);
+                c.lineTo(i,400);
+                c.strokeStyle="blanchedalmond";
+                c.stroke();
+            }
+            for(let j=0;j<count_snake;j++){
+                c.fillStyle="red";
+                c.fillRect(snake[j].x,snake[j].y,20,20);
+            }
+            c.fillStyle="black";
+            c.fillRect(foodx,foody,20,20); 
+
+        }
+        draw();
+        function food(){
+            foodx = Math.floor(Math.random()*30)*20;
+            foody = Math.floor(Math.random()*20)*20;
+        }
+        function move(){
+            switch(lo){
+                case 1://向左
+                    snake.push({x:snake[count_snake-1].x-20,y:snake[count_snake-1].y});
+                    break;
+                case 2://向上
+                    snake.push({x:snake[count_snake-1].x,y:snake[count_snake-1].y-20});
+                    break;
+                case 3://向右
+                    snake.push({x:snake[count_snake-1].x+20,y:snake[count_snake-1].y});
+                    break;
+                case 4://向下
+                    snake.push({x:snake[count_snake-1].x,y:snake[count_snake-1].y+20});
+                    break;
+            }
+            snake.shift();
+            isDead();
+            isEat();
+            draw();
+        }  
+        function isEat(){
+            if(snake[count_snake-1].x==foodx && snake[count_snake-1].y==foody){
+                count_snake++;
+                snake.unshift({x:snake[0].x+(snake[0].x-snake[1].x),y:snake[0].y+(snake[0].y-snake[1].y)});
+                food();
+            }
+        }
+        function isDead(){
+            if (snake[count_snake-1].x>=600 || snake[count_snake-1].x<0){
+                que();
+                stop();
+            }
+            if (snake[count_snake-1].y>=400 || snake[count_snake-1].y<0){
+                que();
+                stop();
+            }
+        }
+        document.onkeydown = function keyboard(e) {
+            event = e || window.event;
+                switch (event.keyCode) {
+                    case 37:
+                        if(lo!=3){
+                            lo = 1; 
+                        }
+                        break;
+                    case 38:
+                        if(lo!=4){
+                            lo = 2;
+                        }
+                         break;
+                    case 39:
+                        if(lo!=1){
+                            lo = 3;
+                        }
+                         break;
+                    case 40:
+                        if(lo!=2){
+                            lo = 4; 
+                        }
+                        break;
+                }
+            }
+            function run(){
+                th = setInterval("move()",500);
+                temp = 1;
+            }
+            function stop(){
+                if(temp==1){
+                    clearInterval(th);
+                    temp = 0;
+                }
+                else{
+                    temp = 1;
+                    th = setInterval("move()",500);
+                }
+            }
+            function que(){
+                var e1 = document.getElementById("star");
+                e1.style.zIndex = 4;
+            }
+            function hide(){
+                var e1 = document.getElementById("star");
+                e1.style.zIndex = -1;
+                start();
+            }
+    </script>
+</body>
+</html>
